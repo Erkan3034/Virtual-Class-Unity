@@ -63,8 +63,9 @@ class DecisionEngine:
             
         # State-dependent overrides (e.g. Sleepy student yields distinct response)
         if state_before.mood == "sleepy" and intent not in ["discipline", "warn"]:
-             selected_response = {"text": "Mhmm... (esner)... Tamam...", "animation": "sleepy_yawn", "emotion": "sleepy"}
+             selected_response = {"reply_text": "Mhmm... (esner)... Tamam...", "animation": "sleepy_yawn", "emotion": "sleepy"}
              rule_id = "sleepy_override"
+
         
         # 6. Commit State Updates
         state_after = self.agent.update_state(
@@ -85,8 +86,9 @@ class DecisionEngine:
         # 8. Build Final Response
         return AIResponse(
             animation=selected_response["animation"],
-            reply_text=selected_response["text"],
+            reply_text=selected_response["reply_text"],
             emotion=selected_response["emotion"], # potentially override from logic
+
             confidence=confidence,
             student_state=self._map_mood_to_state(state_after.mood),
             decision_trace=trace,

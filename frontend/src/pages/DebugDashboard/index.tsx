@@ -13,6 +13,7 @@ import {
     AlertCircle
 } from 'lucide-react';
 import { apiClient } from '../../api/client';
+import { useClassroomWS } from '../../api/ws';
 import type {
     TeacherInputRequest,
     AIResponse,
@@ -20,6 +21,7 @@ import type {
     Student,
     InputSourceType
 } from '../../types/index';
+
 
 // --- Simulation Data ---
 const SIMULATION_STUDENTS: Student[] = [
@@ -39,6 +41,17 @@ export const DebugDashboard: React.FC = () => {
     const [lastResponse, setLastResponse] = useState<AIResponse | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    // --- Live WebSocket ---
+    const { isConnected, lastMessage } = useClassroomWS('room_001', 'dev-debug-token');
+
+    // Update state when live message arrives
+    React.useEffect(() => {
+        if (lastMessage) {
+            setLastResponse(lastMessage);
+        }
+    }, [lastMessage]);
+
 
     // --- Handlers ---
     const handleSimulate = async () => {
@@ -78,11 +91,22 @@ export const DebugDashboard: React.FC = () => {
                     </div>
                 </div>
                 <div className="flex gap-4 text-xs">
+                    {isConnected ? (
+                        <div className="flex items-center gap-2 text-indigo-400 bg-indigo-900/20 px-3 py-1.5 rounded-full border border-indigo-900/30">
+                            <div className="w-2 h-2 bg-indigo-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(99,102,241,0.8)]" />
+                            LIVE UPDATES ON
+                        </div>
+                    ) : (
+                        <div className="flex items-center gap-2 text-slate-500 bg-slate-900/40 px-3 py-1.5 rounded-full border border-slate-800">
+                            OFFLINE
+                        </div>
+                    )}
                     <div className="flex items-center gap-2 text-green-400 bg-green-900/20 px-3 py-1.5 rounded-full border border-green-900/30">
                         <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
                         SYSTEM ONLINE
                     </div>
                 </div>
+
             </header>
 
             <div className="grid grid-cols-12 gap-6">

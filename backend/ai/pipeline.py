@@ -10,6 +10,8 @@ from models.definitions import (
 )
 from nlp.nlp_analyzer import nlp_analyzer
 from state.manager import state_manager
+from ai.gemini_client import gemini_client
+
 
 class DecisionPipeline:
     """
@@ -39,9 +41,11 @@ class DecisionPipeline:
 
         # 5. AI Reasoning (Simulation for now, designed for LLM swap)
         reasoning_result = self._ai_reasoning(nlp_data, current_state, rule_result)
+        print(f"DEBUG: reasoning_result keys: {reasoning_result.keys()}")
 
         # 6. Decision Validator
         validated_decision = self._validate_decision(reasoning_result, current_state)
+        print(f"DEBUG: validated_decision keys: {validated_decision.keys()}")
 
         # 7. Deterministic Response Builder
         response = self._build_deterministic_response(
@@ -50,6 +54,8 @@ class DecisionPipeline:
             request.source,
             start_time_token
         )
+
+
 
         # 8. State Persistence
         self._persist_state(request.student_id, validated_decision)
@@ -81,20 +87,38 @@ class DecisionPipeline:
         """Placeholder for LLM. Combines NLP intent + State + Rules into a student behavior."""
         # Simple simulation based on intent
         responses = {
-            "praise": {"text": "Teşekkürler öğretmenim!", "anim": "happy", "emo": "happy"},
-            "warn": {"text": "Özür dilerim, dikkat ediyorum.", "anim": "alert", "emo": "neutral"},
-            "greeting": {"text": "Merhaba!", "anim": "wave", "emo": "happy"},
-            "unknown": {"text": "...", "anim": "confused", "emo": "confused"}
+            "praise": {"reply_text": "Teşekkürler öğretmenim!", "animation": "happy", "emotion": "happy"},
+            "warn": {"reply_text": "Özür dilerim, dikkat ediyorum.", "animation": "alert", "emotion": "neutral"},
+            "greeting": {"reply_text": "Merhaba!", "animation": "wave", "emotion": "happy"},
+            "unknown": {"reply_text": "...", "animation": "confused", "emotion": "confused"}
         }
         
-        behavior = responses.get(nlp["intent"], responses["unknown"])
+        intent = nlp["intent"]
+        # Use a copy to avoid modifying the original response templates
+        behavior = responses.get(intent, responses["unknown"]).copy()
+        
+        # 1. Gemini Fallback for Unknown or Complex Queries
+        if intent == "unknown" or intent == "question":
+            from nlp.knowledge_base import knowledge_base
+            kb_context = knowledge_base.get_all_topics() # RAG: Get context from KB
+            
+            ai_reply = gemini_client.generate_response(nlp["raw_text"], context=str(kb_context))
+            if ai_reply:
+                behavior["reply_text"] = ai_reply
+                behavior["animation"] = "thinking_pose"
+                behavior["emotion"] = "motivated"
+
+        # Safe access to ensure we don't get KeyError
         return {
-            "reply_text": behavior["text"],
-            "animation": behavior["anim"],
-            "emotion": behavior["emo"],
+            "intent": intent, # Ensure intent is passed through
+            "reply_text": behavior.get("reply_text", "..."),
+            "animation": behavior.get("animation", "confused"),
+            "emotion": behavior.get("emotion", "confused"),
             "confidence": nlp.get("confidence", 0.5),
             "updates": rules
         }
+
+
 
     def _validate_decision(self, decision: Dict[str, Any], state: StudentStateModel) -> Dict[str, Any]:
         # Coherence Check: Can't dance while sleeping

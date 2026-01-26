@@ -183,6 +183,40 @@ export const TeacherPanel: React.FC = () => {
                                         </button>
                                     </div>
 
+                                    <div className="space-y-2">
+                                        <textarea
+                                            placeholder="Type a message or question..."
+                                            className="w-full bg-slate-950 border border-slate-800 rounded-2xl p-4 text-sm text-white focus:border-indigo-500 outline-none resize-none transition-all"
+                                            rows={3}
+                                            disabled={isActionLoading}
+                                            onKeyDown={(e) => {
+                                                if (e.key === 'Enter' && !e.shiftKey) {
+                                                    e.preventDefault();
+                                                    const text = e.currentTarget.value.trim();
+                                                    if (text) {
+                                                        handleTeacherAction('question'); // Default to question intent
+                                                        e.currentTarget.value = '';
+                                                    }
+                                                }
+                                            }}
+                                        />
+                                        <button
+                                            onClick={(e) => {
+                                                const textarea = e.currentTarget.previousSibling as HTMLTextAreaElement;
+                                                const text = textarea.value.trim();
+                                                if (text) {
+                                                    handleTeacherAction('question');
+                                                    textarea.value = '';
+                                                }
+                                            }}
+                                            disabled={isActionLoading}
+                                            className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-sm font-bold transition-all shadow-lg shadow-indigo-900/20 disabled:opacity-50"
+                                        >
+                                            Send Custom Message
+                                        </button>
+                                    </div>
+
+
                                     {actionStatus && (
                                         <motion.div
                                             initial={{ opacity: 0, y: 5 }}

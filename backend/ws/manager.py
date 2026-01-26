@@ -2,7 +2,7 @@ from fastapi import WebSocket, WebSocketDisconnect
 from typing import Dict, List, Set, Any
 import json
 import logging
-from .auth import decode_token
+from security.auth import decode_token
 
 class ConnectionManager:
     """

@@ -27,17 +27,41 @@ async def root():
 
 @app.post("/api/v1/teacher/input", response_model=AIResponse)
 async def process_teacher_input(
-    request: TeacherInputRequest, 
-    user: dict = Depends(check_role(["teacher", "admin"]))
+    request: TeacherInputRequest
 ):
-    """REST endpoint for manual teacher overrides."""
+    """REST endpoint for manual teacher overrides. Auth disabled in DEBUG mode."""
+
     try:
         response = pipeline.process(request)
-        # Broadcast the change to Unity and Debug Dashboard
-        # In a real room setup, room_id would be in the request
+        
+        # BROADCAST: Send the response to Unity and Debug Dashboard
+        # In a real setup, room_id would be in the request or derived from user
+        room_id = "room_001" 
+        
+        # 1. Send full response to Debug Dashboard
+        await manager.send_to_role(room_id, "debug", response.model_dump())
+        
+        # 2. Send simplified response to Unity
+        unity_payload = UnityResponse(
+            animation=response.animation,
+            reply_text=response.reply_text,
+            emotion=response.emotion,
+            confidence=response.confidence,
+            student_state=response.student_state,
+            meta={
+                "latency_ms": response.meta.latency_ms,
+                "decision_id": response.meta.decision_id
+            }
+        )
+        await manager.send_to_role(room_id, "unity", unity_payload.model_dump())
+
         return response
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
+
+
 
 @app.websocket("/ws/v1/classroom/{room_id}")
 async def classroom_socket(

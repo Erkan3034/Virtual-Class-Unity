@@ -5,7 +5,7 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from core.config import settings
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token", auto_error=False)
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     to_encode = data.copy()
@@ -18,8 +18,14 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     return encoded_jwt
 
 def decode_token(token: str):
-    if settings.DEBUG and token == "dev-token":
-        return {"sub": "dev-user", "role": "teacher"}
+    if settings.DEBUG:
+        if token == "dev-token":
+            return {"sub": "dev-user", "role": "teacher"}
+        if token == "dev-debug-token":
+            return {"sub": "debug-console", "role": "debug"}
+        if token == "dev-unity-token":
+            return {"sub": "unity-client", "role": "unity"}
+
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
         return payload
@@ -27,6 +33,11 @@ def decode_token(token: str):
         return None
 
 async def get_current_user(token: str = Depends(oauth2_scheme)):
+    # DEBUG MODE: Auto-authenticate if no valid token
+    if settings.DEBUG:
+        if not token or token == "undefined":
+            return {"sub": "dev-user", "role": "teacher"}
+    
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -34,8 +45,12 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
     )
     payload = decode_token(token)
     if payload is None:
+        # In DEBUG mode, return dev user instead of raising exception
+        if settings.DEBUG:
+            return {"sub": "dev-user", "role": "teacher"}
         raise credentials_exception
     return payload
+
 
 def check_role(roles: List[str]):
     async def role_checker(token_payload: dict = Depends(get_current_user)):
