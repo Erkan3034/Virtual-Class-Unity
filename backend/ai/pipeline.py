@@ -52,8 +52,10 @@ class DecisionPipeline:
             validated_decision, 
             decision_id, 
             request.source,
-            start_time_token
+            start_time_token,
+            current_state
         )
+
 
 
 
@@ -90,23 +92,35 @@ class DecisionPipeline:
             "praise": {"reply_text": "Teşekkürler öğretmenim!", "animation": "happy", "emotion": "happy"},
             "warn": {"reply_text": "Özür dilerim, dikkat ediyorum.", "animation": "alert", "emotion": "neutral"},
             "greeting": {"reply_text": "Merhaba!", "animation": "wave", "emotion": "happy"},
+            "encourage": {"reply_text": "Daha çok çalışacağım!", "animation": "motivated", "emotion": "motivated"},
+            "question": {"reply_text": "Hmm, düşüneyim...", "animation": "thinking", "emotion": "neutral"},
+            "command_sit": {"reply_text": "Oturuyorum öğretmenim.", "animation": "sit", "emotion": "neutral"},
+            "command_stand": {"reply_text": "Kalkıyorum öğretmenim.", "animation": "stand", "emotion": "neutral"},
+            "ignore": {"reply_text": "...", "animation": "idle", "emotion": "neutral"},
             "unknown": {"reply_text": "...", "animation": "confused", "emotion": "confused"}
         }
+
         
         intent = nlp["intent"]
         # Use a copy to avoid modifying the original response templates
         behavior = responses.get(intent, responses["unknown"]).copy()
         
-        # 1. Gemini Fallback for Unknown or Complex Queries
+        # 1. AI Fallback for Unknown or Complex Queries (Groq > Gemini)
         if intent == "unknown" or intent == "question":
             from nlp.knowledge_base import knowledge_base
+            from ai.groq_client import groq_client
             kb_context = knowledge_base.get_all_topics() # RAG: Get context from KB
             
-            ai_reply = gemini_client.generate_response(nlp["raw_text"], context=str(kb_context))
+            # Try Groq first (faster and more reliable), fallback to Gemini
+            ai_reply = groq_client.generate_response(nlp["raw_text"], context=str(kb_context))
+            if not ai_reply:
+                ai_reply = gemini_client.generate_response(nlp["raw_text"], context=str(kb_context))
+            
             if ai_reply:
                 behavior["reply_text"] = ai_reply
                 behavior["animation"] = "thinking_pose"
                 behavior["emotion"] = "motivated"
+
 
         # Safe access to ensure we don't get KeyError
         return {
@@ -128,22 +142,41 @@ class DecisionPipeline:
         
         return decision
 
-    def _build_deterministic_response(self, decision: Dict[str, Any], d_id: str, source: str, start_time: float) -> AIResponse:
+    def _build_deterministic_response(self, decision: Dict[str, Any], d_id: str, source: str, start_time: float, state: StudentStateModel) -> AIResponse:
         latency = int((time.perf_counter() - start_time) * 1000)
+        
+        # Include actual student state data in trace
+        state_data = {
+            "mood": state.mood,
+            "attention_level": state.attention_level,
+            "energy_level": state.energy_level,
+            "current_activity": state.current_activity
+        }
         
         trace = DecisionTrace(
             intent=decision.get("intent", "unknown"),
             rule_applied="primary_logic",
-            state_before={}, # Simplified for now
-            state_after={}
+            state_before=state_data,
+            state_after=state_data  # Updated after persist
         )
+
+        # Map mood to student state
+        mood_to_state = {
+            "happy": "attentive",
+            "neutral": "attentive", 
+            "sad": "confused",
+            "sleepy": "sleepy",
+            "confused": "confused",
+            "motivated": "attentive",
+            "alert": "attentive"
+        }
 
         return AIResponse(
             animation=decision["animation"],
             reply_text=decision["reply_text"],
             emotion=decision["emotion"],
             confidence=decision["confidence"],
-            student_state="attentive", # Map from state later
+            student_state=mood_to_state.get(state.mood, "idle"),
             decision_trace=trace,
             meta=AIResponseMeta(
                 timestamp=datetime.now().isoformat(),
@@ -152,6 +185,7 @@ class DecisionPipeline:
                 decision_id=d_id
             )
         )
+
 
     def _persist_state(self, student_id: str, decision: Dict[str, Any]):
         updates = decision.get("updates", {})

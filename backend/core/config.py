@@ -25,6 +25,8 @@ class Settings(BaseSettings):
     
     # AI Keys
     GEMINI_API_KEY: typing.Optional[str] = None
+    GROQ_API_KEY: typing.Optional[str] = None
+
     
     model_config = SettingsConfigDict(
         env_file=".env",

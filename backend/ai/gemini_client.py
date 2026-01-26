@@ -1,14 +1,20 @@
 import google.generativeai as genai
-import os
 from typing import Optional
+from core.config import settings
 
 class GeminiClient:
     def __init__(self):
-        self.api_key = os.getenv("GEMINI_API_KEY")
+        self.api_key = settings.GEMINI_API_KEY
         self.model = None
         if self.api_key:
             genai.configure(api_key=self.api_key)
-            self.model = genai.GenerativeModel('gemini-pro')
+            self.model = genai.GenerativeModel('models/gemini-2.0-flash')
+            print(f"Gemini API initialized successfully!")
+
+
+        else:
+            print("WARNING: GEMINI_API_KEY not found. AI fallback disabled.")
+
 
     def generate_response(self, prompt: str, context: str = "") -> Optional[str]:
         if not self.model:
