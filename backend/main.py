@@ -1,9 +1,9 @@
 from fastapi import FastAPI, HTTPException, Body
 from fastapi.middleware.cors import CORSMiddleware
-from app.config import settings
-from app.models import TeacherInputRequest, AIResponse
-from app.ai.decision_engine import decision_engine
-from app.api.response_builder import response_builder
+from core.config import settings
+from models.definitions import TeacherInputRequest, AIResponse
+from ai.decision_engine import decision_engine
+
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -23,25 +23,17 @@ app.add_middleware(
 @app.get("/")
 async def root():
     """Health check endpoint."""
-    return {"status": "ok", "message": "Virtual Classroom AI Backend is running"}
+    return {"status": "ok", "message": "Virtual Classroom AI Backend is running."}
 
 @app.post("/teacher-input", response_model=AIResponse)
 async def process_teacher_input(request: TeacherInputRequest):
     """
     Main endpoint for receiving teacher commands.
-    Used by both Unity and Web Frontend.
+    Used by both Unity and Web Debug Panel.
     """
     try:
-        # Core Logic Execution
-        decision, meta = decision_engine.process_input(
-            teacher_id=request.teacher_id,
-            student_id=request.student_id,
-            text=request.content
-        )
-        
-        # Build Response
-        response = response_builder.build_response(decision, meta)
-        
+        # Core Logic Execution (The Brain)
+        response = decision_engine.process_request(request)
         return response
         
     except Exception as e:
