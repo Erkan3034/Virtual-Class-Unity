@@ -30,6 +30,10 @@ class StudentStateModel(BaseModel):
     mood: EmotionType
     attention_level: float
     energy_level: float
+    personality_traits: Dict[str, str] = Field(default_factory=dict)
+    short_term_memory: list[str] = Field(default_factory=list)
+    long_term_memory: list[str] = Field(default_factory=list)
+    last_interaction: Optional[datetime] = None
     current_activity: str
     last_updated: datetime
 
@@ -37,13 +41,26 @@ class StudentStateModel(BaseModel):
 class AIResponseMeta(BaseModel):
     timestamp: str
     source: InputSourceType
+    latency_ms: int = 0
+    decision_id: str = ""
 
 class AIResponse(BaseModel):
-    animation: str = Field(..., description="Name of the animation to trigger in Unity")
-    reply_text: str = Field(..., description="Text response from the student")
-    emotion: EmotionType = Field(..., description="Emotion tag for facial expressions")
-    confidence: float = Field(..., description="Confidence score of the decision (0.0-1.0)")
-    student_state: StudentStateType = Field(..., description="High level state summary")
-    decision_trace: DecisionTrace = Field(..., description="Detailed trace of AI decision logic")
-    meta: AIResponseMeta = Field(..., description="Metadata including timestamp")
+    """Internal full response model with trace for Debug Dashboard."""
+    animation: str
+    reply_text: str
+    emotion: EmotionType
+    confidence: float
+    student_state: StudentStateType
+    decision_trace: DecisionTrace
+    meta: AIResponseMeta
+
+class UnityResponse(BaseModel):
+    """Strictly enforced contract for Unity Client."""
+    animation: str
+    reply_text: str
+    emotion: EmotionType
+    confidence: float
+    student_state: StudentStateType
+    meta: Dict[str, Any] # latency_ms and decision_id
+
 

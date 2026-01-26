@@ -24,19 +24,33 @@ Unity receives exactly this shape for every student response.
 - **Emotion**: `NEUTRAL`, `JOY`, `SADNESS`, `ANGER`, `SURPRISE`, `FEAR`, `DISGUST`.
 - **Student State**: `ACTIVE`, `DISTRACTED`, `SLEEPING`, `TIRED`, `ENGAGED`.
 
-### Teacher Web Panel Commands
-Teachers can send commands to override AI or trigger specific events.
+### System Messages (Internal Commands)
+Used for auth and lifecycle synchronization.
 
 ```json
 {
-  "type": "OVERRIDE_ACTION",
-  "student_id": "uuid",
-  "action": "praise",
-  "payload": {}
+  "type": "CLIENT_INIT",
+  "client_id": "uuid",
+  "role": "unity | teacher | debug",
+  "token": "jwt_token"
+}
+```
+
+```json
+{
+  "type": "STATE_SNAPSHOT",
+  "room_id": "uuid",
+  "students": [
+     { "student_id": "uuid", "state": "attentive", "animation": "idle" }
+  ]
 }
 ```
 
 ## REST API (v1)
+
+### Security
+- `POST /api/v1/auth/login` - Returns JWT with roles.
+- `GET /api/v1/auth/verify` - Validates token.
 
 ### Student Management
 - `GET /api/v1/students/` - List all students.

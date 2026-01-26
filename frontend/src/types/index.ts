@@ -23,9 +23,24 @@ export interface DecisionTrace {
   state_after: Record<string, any>;
 }
 
+export interface StudentStateModel {
+  student_id: string;
+  mood: EmotionType;
+  attention_level: number;
+  energy_level: number;
+  personality_traits: Record<string, string>;
+  short_term_memory: string[];
+  long_term_memory: string[];
+  last_interaction?: string;
+  current_activity: string;
+  last_updated: string;
+}
+
 export interface AIResponseMeta {
   timestamp: string;
   source: InputSourceType;
+  latency_ms: number;
+  decision_id: string;
 }
 
 // --- Response ---
@@ -38,6 +53,19 @@ export interface AIResponse {
   decision_trace: DecisionTrace;
   meta: AIResponseMeta;
 }
+
+export interface UnityResponse {
+  animation: string;
+  reply_text: string;
+  emotion: EmotionType;
+  confidence: number;
+  student_state: StudentStateType;
+  meta: {
+    latency_ms: number;
+    decision_id: string;
+  };
+}
+
 
 // --- UI Helpers ---
 export interface Student {

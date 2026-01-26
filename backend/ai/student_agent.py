@@ -1,6 +1,6 @@
 from typing import Dict
 from datetime import datetime
-from ..models import StudentStateModel, EmotionType
+from models.definitions import StudentStateModel, EmotionType
 
 class StudentAgent:
     """

@@ -1,9 +1,9 @@
 import random
 from typing import Dict, Any, Tuple
 from datetime import datetime
-from ..nlp.nlp_analyzer import nlp_analyzer
+from nlp.nlp_analyzer import nlp_analyzer
 from .student_agent import student_agent
-from ..models import (
+from models.definitions import (
     TeacherInputRequest, AIResponse, AIResponseMeta, 
     DecisionTrace, StudentStateModel, EmotionType
 )

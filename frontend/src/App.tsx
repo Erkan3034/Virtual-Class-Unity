@@ -1,12 +1,21 @@
-import { DebugDashboard } from './components/DebugDashboard'
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { TeacherPanel } from './pages/TeacherPanel';
+import { DebugDashboard } from './pages/DebugDashboard';
+import { MainLayout } from './layouts/MainLayout';
+import './App.css';
 
 function App() {
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 font-mono selection:bg-indigo-500/30">
-      <div className="fixed inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-5 pointer-events-none"></div>
-      <DebugDashboard />
-    </div>
-  )
+    <Router>
+      <MainLayout>
+        <Routes>
+          <Route path="/" element={<Navigate to="/teacher" replace />} />
+          <Route path="/teacher" element={<TeacherPanel />} />
+          <Route path="/debug" element={<DebugDashboard />} />
+        </Routes>
+      </MainLayout>
+    </Router>
+  );
 }
 
-export default App
+export default App;

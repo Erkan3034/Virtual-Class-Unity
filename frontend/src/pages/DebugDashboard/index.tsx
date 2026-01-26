@@ -12,14 +12,14 @@ import {
     Zap,
     AlertCircle
 } from 'lucide-react';
-import { apiClient } from '../api/client';
+import { apiClient } from '../../api/client';
 import type {
     TeacherInputRequest,
     AIResponse,
     TeacherActionType,
     Student,
     InputSourceType
-} from '../types/index';
+} from '../../types/index';
 
 // --- Simulation Data ---
 const SIMULATION_STUDENTS: Student[] = [
@@ -55,7 +55,7 @@ export const DebugDashboard: React.FC = () => {
         };
 
         try {
-            const response = await apiClient.sendTeacherInput(payload);
+            const response = await apiClient.sendTeacherAction(payload);
             setLastResponse(response);
         } catch (err: any) {
             setError(err.message || "Simulation Failed");
