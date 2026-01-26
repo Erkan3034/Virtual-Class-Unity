@@ -11,6 +11,10 @@ export const apiClient = {
     },
 
     async sendTeacherAction(data: TeacherInputRequest): Promise<AIResponse> {
+        return this.sendTeacherInput(data);
+    },
+
+    async sendTeacherInput(data: TeacherInputRequest): Promise<AIResponse> {
         let token = localStorage.getItem('token');
         if (!token) {
             token = "dev-token"; // Fallback for dev
@@ -33,4 +37,5 @@ export const apiClient = {
 
         return response.json();
     },
+
 };

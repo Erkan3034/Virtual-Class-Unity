@@ -1,0 +1,2 @@
+C:\yedekler\OneDrive\Masa?st?\Virtual-Class\frontend\src\components\TeacherPanel.tsx
+C:\yedekler\OneDrive\Masa?st?\Virtual-Class\frontend\src\pages\TeacherPanel

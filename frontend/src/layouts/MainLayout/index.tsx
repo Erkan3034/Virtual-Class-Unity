@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, ShieldCheck, LogOut, GraduationCap } from 'lucide-react';
+import { LayoutDashboard, ShieldCheck, LogOut, GraduationCap, Box } from 'lucide-react';
 
 interface MainLayoutProps {
     children: React.ReactNode;
@@ -28,6 +28,17 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                     >
                         <LayoutDashboard size={20} />
                         <span className="font-medium">Teacher Panel</span>
+                    </NavLink>
+
+                    <NavLink
+                        to="/unity"
+                        className={({ isActive }) =>
+                            `flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${isActive ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-900/40' : 'hover:bg-slate-800 text-slate-400'
+                            }`
+                        }
+                    >
+                        <Box size={20} />
+                        <span className="font-medium">Unity Integration</span>
                     </NavLink>
 
                     <NavLink
