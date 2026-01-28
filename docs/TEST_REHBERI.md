@@ -31,25 +31,45 @@ Bu komut, sanki öğretmen panelinden veya Unity'den bir girdi gelmiş gibi yapa
 }
 ```
 
-### Beklenen Yanıt (200 OK)
+### Örnek İstek (Postman Screenshot)
+![Postman İstek Örneği](/docs/media/image.png)
+![Postman İstek Örneği](/docs/media/image_web.png)
+
+### Gerçek Test Sonucu (200 OK)
 
 ```json
 {
     "animation": "wave",
-    "reply_text": "Merhaba! İyiyim, teşekkürler öğretmenim.",
+    "reply_text": "Merhaba!",
     "emotion": "happy",
-    "confidence": 0.957,
+    "confidence": 0.9,
     "student_state": "attentive",
     "decision_trace": {
         "intent": "greeting",
-        "state_before": { ... },
-        "state_after": { ... }
+        "rule_applied": "primary_logic",
+        "state_before": {
+            "mood": "neutral",
+            "attention_level": 0.8,
+            "energy_level": 0.8,
+            "current_activity": "listening"
+        },
+        "state_after": {
+            "mood": "neutral",
+            "attention_level": 0.8,
+            "energy_level": 0.8,
+            "current_activity": "listening"
+        }
     },
-    "meta": { ... }
+    "meta": {
+        "timestamp": "2026-01-28T12:51:28.918875",
+        "source": "unity",
+        "latency_ms": 0,
+        "decision_id": "8c7b147b-e7ff-4a9d-8e24-ccc6f7a1e2b6"
+    }
 }
 ```
 
-Eğer bu yanıtı alıyorsanız, Backend (YZ, NLP) sorunsuz çalışıyor demektir.
+Bu sonuç, sistemin hem niyeti (greeting) doğru anladığını hem de Unity için gerekli animasyon ve duygu verilerini başarıyla ürettiğini gösterir.
 
 ---
 
@@ -84,3 +104,68 @@ Backend konsolunda veya tarayıcıdaki Debug Dashboard'da (`http://localhost:517
 1. Unity'de bir tuşa basın (örn: 1).
 2. Backend terminalinde `INFO: ... POST /api/v1/teacher/input` logunu görün.
 3. Frontend Debug panelinde yeni bir satır eklendiğini doğrulayın.
+
+---
+
+## 3. LLM (Yapay Zeka) Testi
+
+Backend, basit komutları (merhaba, aferin vb.) kural tabanlı olarak hızlıca yanıtlar. Daha karmaşık veya bilinmeyen sorular sorulduğunda ise **Groq (Llama 3)** veya **Gemini** devreye girer.
+
+### LLM'i Tetikleme Senaryosu
+
+- **Metod:** `POST`
+- **URL:** `http://localhost:8000/api/v1/teacher/input`
+- **Body (JSON):**
+
+```json
+{
+  "source": "web",
+  "teacher_id": "test_teacher_1",
+  "student_id": "student_001",
+  "input_type": "text",
+  "content": "Güneş sistemindeki en büyük gezegen hangisidir?"
+}
+```
+## Gercek Test(POSTMAN)
+![Postman İstek Örneği](/docs/media/llm_web.png)
+
+
+### Yanıt
+
+```json
+{
+    "animation": "thinking_pose",
+    "reply_text": "Jüpiter, güneş sistemindeki en büyük gezegen.",
+    "emotion": "motivated",
+    "confidence": 0.4,
+    "student_state": "attentive",
+    "decision_trace": {
+        "intent": "unknown",
+        "rule_applied": "primary_logic",
+        "state_before": {
+            "mood": "neutral",
+            "attention_level": 0.8,
+            "energy_level": 0.8,
+            "current_activity": "listening"
+        },
+        "state_after": {
+            "mood": "neutral",
+            "attention_level": 0.8,
+            "energy_level": 0.8,
+            "current_activity": "listening"
+        }
+    },
+    "meta": {
+        "timestamp": "2026-01-28T13:04:00.832555",
+        "source": "web",
+        "latency_ms": 381,
+        "decision_id": "c1de5cc2-9529-49f0-bc03-79d8b3576655"
+    }
+}
+```
+
+Bu durumda yanıt kural tabanlı değil, yapay zeka tarafından üretileceği için şu detaylara dikkat edin:
+1. **Rule Applied**: `None` veya kural uygulanmadığını belirten bir değer olmalı.
+2. **Confidence**: LLM'den gelen güven skoru (genelde 0.8-1.0 arası).
+3. **Reply Text**: "Güneş sistemindeki en büyük gezegen Jüpiter'dir..." gibi anlamlı bir cümle.
+
