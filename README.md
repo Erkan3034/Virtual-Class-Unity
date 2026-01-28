@@ -58,7 +58,6 @@ Sistemin çekirdeği, girdileri aşamalı olarak işleyen `ai/pipeline.py` dosya
    DEBUG=True
    SECRET_KEY=your_secret_key
    ```
-   *(Not: Ekip çalışması yapıyorsanız anahtarlar için `.env.example` dosyasına bakın veya isteyin)*
 
 5. Sunucuyu çalıştırın:
    ```bash
