@@ -173,6 +173,7 @@ class DecisionPipeline:
         }
 
         return AIResponse(
+            student_id=state.student_id,
             animation=decision["animation"],
             reply_text=decision["reply_text"],
             emotion=decision["emotion"],

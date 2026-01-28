@@ -13,7 +13,7 @@ StudentStateType = Literal["attentive", "sleepy", "confused", "successful", "idl
 class TeacherInputRequest(BaseModel):
     source: InputSourceType = Field("unity", description="Source of the request")
     teacher_id: str = Field(..., description="ID of the teacher sending the command")
-    student_id: str = Field(..., description="ID of the target student")
+    student_id: int = Field(..., description="ID of the target student")
     teacher_action: Optional[TeacherActionType] = Field(None, description="Explicit action type if available (e.g. from button click)")
     input_type: InputTypeType = Field("text", description="Type of input: text or voice")
     content: str = Field(..., description="The actual text content or command payload")
@@ -26,7 +26,7 @@ class DecisionTrace(BaseModel):
     state_after: Dict[str, Any] = Field(..., description="Student state after processing")
 
 class StudentStateModel(BaseModel):
-    student_id: str
+    student_id: int
     mood: EmotionType
     attention_level: float
     energy_level: float
@@ -47,6 +47,7 @@ class AIResponseMeta(BaseModel):
 
 class AIResponse(BaseModel):
     """Internal full response model with trace for Debug Dashboard."""
+    student_id: int
     animation: str
     reply_text: str
     emotion: EmotionType
@@ -57,6 +58,7 @@ class AIResponse(BaseModel):
 
 class UnityResponse(BaseModel):
     """Strictly enforced contract for Unity Client."""
+    student_id: int
     animation: str
     reply_text: str
     emotion: EmotionType

@@ -19,10 +19,10 @@ import type { Student, TeacherActionType, TeacherInputRequest, AIResponse } from
 import { apiClient } from '../../api/client';
 
 const MOCK_STUDENTS: Student[] = [
-    { id: '1', name: 'Güneş Aksoy', avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Gunes' },
-    { id: '2', name: 'Deniz Yılmaz', avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Deniz' },
-    { id: '3', name: 'Rüzgar Demir', avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Ruzgar' },
-    { id: '4', name: 'Bulut Kaya', avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Bulut' },
+    { id: 1, name: 'Güneş Aksoy', avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Gunes' },
+    { id: 2, name: 'Deniz Yılmaz', avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Deniz' },
+    { id: 3, name: 'Rüzgar Demir', avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Ruzgar' },
+    { id: 4, name: 'Bulut Kaya', avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Bulut' },
 ];
 
 const MOCK_ACTIVITIES = [
@@ -65,7 +65,7 @@ const MOCK_ACTIVITIES = [
 ];
 
 export const TeacherPanel: React.FC = () => {
-    const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
+    const [selectedStudentId, setSelectedStudentId] = useState<number | null>(null);
     const [isActionLoading, setIsActionLoading] = useState(false);
     const [actionStatus, setActionStatus] = useState<string | null>(null);
     const [lastResponse, setLastResponse] = useState<AIResponse | null>(null);
@@ -173,7 +173,7 @@ export const TeacherPanel: React.FC = () => {
                 const response = await apiClient.sendTeacherAction({
                     source: "web",
                     teacher_id: "teacher_001",
-                    student_id: selectedStudentId || "student_001",
+                    student_id: selectedStudentId || 1,
                     input_type: "voice",
                     content: base64Audio
                 });
@@ -306,7 +306,7 @@ export const TeacherPanel: React.FC = () => {
                                         className="w-24 h-24 rounded-3xl bg-slate-800 border-4 border-slate-800 p-2 mb-4"
                                     />
                                     <h3 className="text-xl font-bold text-white">{MOCK_STUDENTS.find(s => s.id === selectedStudentId)?.name}</h3>
-                                    <span className="text-slate-500 text-sm">Classroom ID: #{selectedStudentId.padStart(4, '0')}</span>
+                                    <span className="text-slate-500 text-sm">Classroom ID: #{String(selectedStudentId).padStart(4, '0')}</span>
                                 </div>
 
                                 <div className="space-y-4">

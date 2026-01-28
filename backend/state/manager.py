@@ -14,22 +14,22 @@ class StateManager:
     def __init__(self):
         self._local_storage: Dict[str, str] = {} # Simulating Redis key-value storage
 
-    def _get_key(self, student_id: str) -> str:
+    def _get_key(self, student_id: int) -> str:
         return f"student:state:{student_id}"
 
-    def get_student_state(self, student_id: str) -> Optional[StudentStateModel]:
+    def get_student_state(self, student_id: int) -> Optional[StudentStateModel]:
         key = self._get_key(student_id)
         data = self._local_storage.get(key)
         if not data:
             return None
         return StudentStateModel.model_validate_json(data)
 
-    def set_student_state(self, student_id: str, state: StudentStateModel):
+    def set_student_state(self, student_id: int, state: StudentStateModel):
         key = self._get_key(student_id)
         state.last_updated = datetime.now()
         self._local_storage[key] = state.model_dump_json()
 
-    def update_student_state(self, student_id: str, updates: Dict[str, Any]) -> StudentStateModel:
+    def update_student_state(self, student_id: int, updates: Dict[str, Any]) -> StudentStateModel:
         state = self.get_student_state(student_id)
         if not state:
             # Initialize default state with required fields
@@ -57,7 +57,7 @@ class StateManager:
         self.set_student_state(student_id, updated_state)
         return updated_state
 
-    def acquire_lock(self, student_id: str, duration_ms: int = 2000) -> bool:
+    def acquire_lock(self, student_id: int, duration_ms: int = 2000) -> bool:
         """Simple mutex simulation for teacher overrides."""
         # In Redis: SET key val NX PX duration_ms
         return True # Simplified for this version

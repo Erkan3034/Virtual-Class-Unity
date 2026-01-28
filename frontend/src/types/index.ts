@@ -9,7 +9,7 @@ export type StudentStateType = "attentive" | "sleepy" | "confused" | "successful
 export interface TeacherInputRequest {
   source: InputSourceType;
   teacher_id: string;
-  student_id: string;
+  student_id: number;
   teacher_action?: TeacherActionType;
   input_type: InputTypeType;
   content: string;
@@ -24,7 +24,7 @@ export interface DecisionTrace {
 }
 
 export interface StudentStateModel {
-  student_id: string;
+  student_id: number;
   mood: EmotionType;
   attention_level: number;
   energy_level: number;
@@ -56,6 +56,7 @@ export interface AIResponse {
 }
 
 export interface UnityResponse {
+  student_id: number;
   animation: string;
   reply_text: string;
   emotion: EmotionType;
@@ -70,7 +71,7 @@ export interface UnityResponse {
 
 // --- UI Helpers ---
 export interface Student {
-  id: string;
+  id: number;
   name: string;
   avatarUrl: string;
 }

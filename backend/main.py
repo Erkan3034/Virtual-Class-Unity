@@ -56,6 +56,7 @@ async def process_teacher_input(
         
         # 2. Send simplified response to Unity
         unity_payload = UnityResponse(
+            student_id=response.student_id,
             animation=response.animation,
             reply_text=response.reply_text,
             emotion=response.emotion,
@@ -110,7 +111,7 @@ async def classroom_socket(
                 req = TeacherInputRequest(
                     source="unity",
                     teacher_id="system",
-                    student_id=data["student_id"],
+                    student_id=int(data["student_id"]),
                     content=content,
                     input_type=input_type
                 )
@@ -118,6 +119,7 @@ async def classroom_socket(
                 
                 # 2. Strict Contract Enforcement for Unity
                 unity_payload = UnityResponse(
+                    student_id=response.student_id,
                     animation=response.animation,
                     reply_text=response.reply_text,
                     emotion=response.emotion,
