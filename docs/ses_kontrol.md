@@ -1,4 +1,4 @@
-# Unity Sesli Komut Entegrasyon Rehberi 🎤
+# Unity Sesli Komut Entegrasyon Rehberi 
 
 Bu döküman, Unity tarafında kaydedilen seslerin backend sistemine nasıl gönderileceğini ve nasıl test edileceğini açıklar.
 
