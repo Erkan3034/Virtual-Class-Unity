@@ -22,15 +22,15 @@ export const UnityIntegration: React.FC = () => {
                         <div className="p-2 bg-indigo-500/10 rounded-lg border border-indigo-500/20">
                             <Box className="text-indigo-400" size={24} />
                         </div>
-                        <h1 className="text-3xl font-bold text-white tracking-tight">Unity Integration</h1>
+                        <h1 className="text-3xl font-bold text-white tracking-tight">Unity Entegrasyonu</h1>
                     </div>
                     <p className="text-slate-500 max-w-2xl">
-                        Technical guide and code references for connecting Unity clients to the Virtual Classroom AI Decision Engine.
+                        Unity istemcilerini Virtual Classroom AI Karar Mekanizmasına bağlamak için teknik rehber ve kod referansları.
                     </p>
                 </div>
                 <div className="flex gap-4">
                     <div className="flex items-center gap-2 text-indigo-400 bg-indigo-900/20 px-3 py-1.5 rounded-full border border-indigo-900/30 text-xs font-bold uppercase tracking-widest">
-                        v1.2.0-stable
+                        v1.2.0-kararlı
                     </div>
                 </div>
             </div>
@@ -42,13 +42,13 @@ export const UnityIntegration: React.FC = () => {
                         <Workflow size={120} />
                     </div>
                     <h2 className="text-lg font-bold text-white flex items-center gap-2 mb-6">
-                        <Workflow size={20} className="text-indigo-400" /> Data Lifecycle & Synchronization
+                        <Workflow size={20} className="text-indigo-400" /> Veri Döngüsü ve Senkronizasyon
                     </h2>
 
                     <div className="relative flex flex-col md:flex-row items-center justify-between gap-4 py-4">
                         <div className="z-10 bg-slate-800 border border-slate-700 p-4 rounded-xl text-center min-w-[140px]">
-                            <div className="text-indigo-400 font-bold text-xs mb-1 uppercase">Unity Client</div>
-                            <div className="text-white text-sm">Send Interaction</div>
+                            <div className="text-indigo-400 font-bold text-xs mb-1 uppercase">Unity İstemci</div>
+                            <div className="text-white text-sm">Etkileşim Gönder</div>
                         </div>
 
                         <div className="hidden md:block flex-1 h-[2px] bg-gradient-to-r from-indigo-500/50 via-slate-700 to-indigo-500/50 relative">
@@ -58,8 +58,8 @@ export const UnityIntegration: React.FC = () => {
                         </div>
 
                         <div className="z-10 bg-indigo-600 p-4 rounded-xl text-center min-w-[140px] shadow-lg shadow-indigo-900/40">
-                            <div className="text-indigo-100 font-bold text-xs mb-1 uppercase">AI Brain</div>
-                            <div className="text-white text-sm">Decision Engine</div>
+                            <div className="text-indigo-100 font-bold text-xs mb-1 uppercase">AI Beyin</div>
+                            <div className="text-white text-sm">Karar Motoru</div>
                         </div>
 
                         <div className="hidden md:block flex-1 h-[2px] bg-gradient-to-r from-indigo-500/50 via-slate-700 to-indigo-500/50 relative">
@@ -69,24 +69,23 @@ export const UnityIntegration: React.FC = () => {
                         </div>
 
                         <div className="z-10 bg-slate-800 border border-slate-700 p-4 rounded-xl text-center min-w-[140px]">
-                            <div className="text-emerald-400 font-bold text-xs mb-1 uppercase">Unity Client</div>
-                            <div className="text-white text-sm">Play Animation</div>
+                            <div className="text-emerald-400 font-bold text-xs mb-1 uppercase">Unity İstemci</div>
+                            <div className="text-white text-sm">Animasyon Oynat</div>
                         </div>
                     </div>
 
                     <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="bg-slate-950/50 p-4 rounded-xl border border-slate-800/50">
-                            <h4 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Request Flow</h4>
+                            <h4 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">İstek Akışı</h4>
                             <p className="text-xs text-slate-400 leading-relaxed">
-                                interaction is sent via REST or WebSockets as a <code className="text-indigo-400">TeacherInputRequest</code>.
-                                The backend processes intent, state, and rules.
+                                Etkileşimler REST veya WebSockets üzerinden <code className="text-indigo-400">TeacherInputRequest</code> olarak gönderilir.
+                                Backend niyet, durum ve kuralları işler.
                             </p>
                         </div>
                         <div className="bg-slate-950/50 p-4 rounded-xl border border-slate-800/50">
-                            <h4 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Response Handling</h4>
+                            <h4 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Yanıt Yönetimi</h4>
                             <p className="text-xs text-slate-400 leading-relaxed">
-                                Unity receives a <code className="text-emerald-400">UnityResponse</code> containing specific
-                                animation triggers, reply text, and modified student states.
+                                Unity, belirli animasyon tetikleyicileri, metin yanıtları ve güncellenmiş öğrenci durumlarını içeren bir <code className="text-emerald-400">UnityResponse</code> alır.
                             </p>
                         </div>
                     </div>
@@ -99,9 +98,9 @@ export const UnityIntegration: React.FC = () => {
                             <Globe size={100} />
                         </div>
                         <h3 className="font-bold flex items-center gap-2 mb-2">
-                            <Globe size={18} /> Endpoint URL
+                            <Globe size={18} /> API Adresi
                         </h3>
-                        <p className="text-indigo-100 text-sm mb-4">Production or Local API gateway</p>
+                        <p className="text-indigo-100 text-sm mb-4">Yerel veya Prodüksiyon API URL'si</p>
                         <div className="bg-white/10 backdrop-blur-md rounded-lg p-3 font-mono text-xs border border-white/20 select-all">
                             http://localhost:8000/api/v1/teacher/input
                         </div>
@@ -109,15 +108,71 @@ export const UnityIntegration: React.FC = () => {
 
                     <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-6">
                         <h3 className="font-bold text-white flex items-center gap-2 mb-4 text-sm">
-                            <Layers size={16} className="text-indigo-400" /> Animation Triggers
+                            <Layers size={16} className="text-indigo-400" /> Animasyon Tetikleyicileri
                         </h3>
                         <div className="space-y-2">
                             {['happy_nod', 'excited_raise_hand', 'confused_head_scratch', 'sleepy_yawn', 'thinking_pose'].map(trigger => (
                                 <div key={trigger} className="flex justify-between items-center bg-slate-950/40 p-2 rounded-lg border border-slate-800 text-[10px] font-mono group hover:border-indigo-500/50 transition-colors">
                                     <span className="text-slate-400">{trigger}</span>
-                                    <span className="text-indigo-400 opacity-0 group-hover:opacity-100 uppercase font-bold tracking-tighter">Ready</span>
+                                    <span className="text-indigo-400 opacity-0 group-hover:opacity-100 uppercase font-bold tracking-tighter">Hazır</span>
                                 </div>
                             ))}
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            {/* Scripts & Assets Integration */}
+            <div className="grid grid-cols-1 overflow-hidden">
+                <section className="bg-slate-900/40 border border-slate-800 rounded-2xl p-6 relative">
+                    <div className="absolute top-0 right-0 p-8 opacity-5">
+                        <Code2 size={120} />
+                    </div>
+                    <h2 className="text-lg font-bold text-white flex items-center gap-2 mb-6">
+                        <Code2 size={20} className="text-indigo-400" /> Script ve Varlık Entegrasyonu
+                    </h2>
+
+                    <div className="space-y-6">
+                        <div>
+                            <h3 className="text-sm font-bold text-slate-300 mb-3 flex items-center gap-2">
+                                <ChevronRight size={14} className="text-indigo-400" /> Adım 1: Scriptleri Kopyalayın
+                            </h3>
+                            <p className="text-xs text-slate-500 mb-4 leading-relaxed">
+                                Proje ana dizinindeki <code className="text-white">unity_assets/</code> veya <code className="text-white">Unity/Scripts/VirtualClass/</code> klasöründeki scriptleri Unity projenizin <code className="text-indigo-400">Assets/Scripts/VirtualClass/</code> yoluna kopyalayın.
+                            </p>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="bg-slate-950/50 p-4 rounded-xl border border-slate-800/50">
+                                <h4 className="text-xs font-bold text-emerald-400 uppercase tracking-widest mb-2">AIClient.cs (Hızlı Başlangıç)</h4>
+                                <p className="text-[10px] text-slate-400 leading-relaxed mb-3">
+                                    Tek bir script ile REST API üzerinden hızlıca bağlantı kurmanızı sağlar. Basit triggerlar ve hızlı testler için idealdir.
+                                </p>
+                                <div className="text-[10px] text-slate-500 font-mono">
+                                    Konum: /unity_assets/AIClient.cs
+                                </div>
+                            </div>
+                            <div className="bg-slate-950/50 p-4 rounded-xl border border-slate-800/50">
+                                <h4 className="text-xs font-bold text-indigo-400 uppercase tracking-widest mb-2">VirtualClass Paketi (Tam Entegrasyon)</h4>
+                                <p className="text-[10px] text-slate-400 leading-relaxed mb-3">
+                                    WebSocket tabanlı, gerçek zamanlı ve çoklu öğrenci desteği sunan gelişmiş script seti.
+                                </p>
+                                <div className="text-[10px] text-slate-500 font-mono">
+                                    Konum: /Unity/Scripts/VirtualClass/*
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h3 className="text-sm font-bold text-slate-300 mb-3 flex items-center gap-2">
+                                <ChevronRight size={14} className="text-indigo-400" /> Adım 2: NativeWebSocket Kurulumu
+                            </h3>
+                            <p className="text-xs text-slate-500 mb-4 leading-relaxed">
+                                Eğer tam entegrasyon (WebSocket) kullanacaksanız, Unity Package Manager üzerinden NativeWebSocket paketini eklemelisiniz:
+                            </p>
+                            <div className="bg-black/40 p-3 rounded-lg border border-slate-800 font-mono text-[10px] text-indigo-300 select-all">
+                                https://github.com/endel/NativeWebSocket.git#upm
+                            </div>
                         </div>
                     </div>
                 </section>
@@ -128,7 +183,7 @@ export const UnityIntegration: React.FC = () => {
                 {/* Contract definition */}
                 <section className="bg-slate-900/40 border border-slate-800 rounded-2xl overflow-hidden flex flex-col">
                     <div className="p-4 bg-slate-900 border-b border-slate-800 flex justify-between items-center font-mono text-[10px]">
-                        <span className="text-slate-500 flex items-center gap-2"><Code2 size={12} /> Contracts.cs</span>
+                        <span className="text-slate-500 flex items-center gap-2"><Code2 size={12} /> Models.cs</span>
                         <span className="text-slate-700">UNITY SERIALIZABLE</span>
                     </div>
                     <div className="p-0 flex-1 bg-black relative">
@@ -184,17 +239,17 @@ public class AIResponse {
             <div className="grid grid-cols-1 overflow-hidden">
                 <section className="bg-slate-900/40 border border-slate-800 rounded-2xl p-6">
                     <h2 className="text-lg font-bold text-white flex items-center gap-2 mb-6">
-                        <Mic size={20} className="text-rose-400" /> Audio / Voice Integration
+                        <Mic size={20} className="text-rose-400" /> Ses ve Audio Entegrasyonu
                     </h2>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div>
                             <h3 className="text-sm font-bold text-slate-300 mb-3 flex items-center gap-2">
-                                <ChevronRight size={14} className="text-indigo-400" /> Option A: Unity-Side STT (Recommended)
+                                <ChevronRight size={14} className="text-indigo-400" /> Seçenek A: Unity Tarafı STT (Önerilen)
                             </h3>
                             <p className="text-xs text-slate-500 mb-4 leading-relaxed">
-                                Use Unity's <code className="text-indigo-400">Speech-To-Text</code> SDK to transcribe audio locally.
-                                Send the resulting string in the <code className="text-white">content</code> field.
+                                Unity'nin <code className="text-indigo-400">Speech-To-Text</code> SDK'sını kullanarak sesi yerel olarak metne dönüştürün.
+                                Ortaya çıkan metni <code className="text-white">content</code> alanında gönderin.
                             </p>
                             <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 font-mono text-[10px] text-indigo-300">
                                 {`request.input_type = "text";\nrequest.content = "Ödevini neden yapmadın?";`}
@@ -203,14 +258,14 @@ public class AIResponse {
 
                         <div>
                             <h3 className="text-sm font-bold text-slate-300 mb-3 flex items-center gap-2">
-                                <ChevronRight size={14} className="text-indigo-400" /> Option B: Backend-Side Transcription
+                                <ChevronRight size={14} className="text-indigo-400" /> Seçenek B: Backend Tarafı İşleme
                             </h3>
                             <p className="text-xs text-slate-500 mb-4 leading-relaxed">
-                                Encode raw audio to **Base64** and send it directly. The AI Brain will perform
-                                neural transcription before the decision pipeline.
+                                Ham ses verisini **Base64** formatında kodlayarak doğrudan gönderin. AI Beyni karar mekanizmasından önce
+                                sinirsel deşifre işlemi uygulayacaktır.
                             </p>
                             <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 font-mono text-[10px] text-rose-300">
-                                {`request.input_type = "voice";\nrequest.content = "BASE64_AUDIO_DATA_HERE...";`}
+                                {`request.input_type = "voice";\nrequest.content = "BASE64_SES_VERISI_BURAYA...";`}
                             </div>
                         </div>
                     </div>
@@ -223,11 +278,11 @@ public class AIResponse {
                     <Info className="text-indigo-400" size={20} />
                 </div>
                 <div>
-                    <h3 className="text-sm font-bold text-white mb-1">Production Best Practices</h3>
+                    <h3 className="text-sm font-bold text-white mb-1">Üretim Ortamı İçin En İyi Uygulamalar</h3>
                     <p className="text-xs text-slate-500 leading-relaxed">
-                        For real-time multi-agent environments, it is recommended to use <strong>WebSockets</strong> for state updates.
-                        The REST endpoint shown here is best for developer triggers or manual overrides from the teacher panel.
-                        Check the <span className="text-indigo-400 hover:underline cursor-pointer">API Contract documentation</span> for full schema details.
+                        Gerçek zamanlı çoklu ajan ortamları için durum güncellemelerinde <strong>WebSockets</strong> kullanılması önerilir.
+                        Burada gösterilen REST uç noktası, geliştirici tetikleyicileri veya öğretmen panelinden yapılan manuel müdahaleler için uygundur.
+                        Detaylı şema bilgileri için <span className="text-indigo-400 hover:underline cursor-pointer">API Sözleşme dokümanını</span> inceleyin.
                     </p>
                 </div>
             </div>

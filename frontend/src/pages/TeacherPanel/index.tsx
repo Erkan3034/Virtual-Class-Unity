@@ -22,6 +22,45 @@ const MOCK_STUDENTS: Student[] = [
     { id: '4', name: 'Bulut Kaya', avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Bulut' },
 ];
 
+const MOCK_ACTIVITIES = [
+    {
+        id: 1,
+        studentName: 'Güneş Aksoy',
+        action: 'soruyu doğru cevapladı',
+        subject: 'Kuantum Fiziği',
+        time: '2 DAKİKA ÖNCE',
+        type: 'success',
+        icon: <Award size={14} />
+    },
+    {
+        id: 2,
+        studentName: 'Rüzgar Demir',
+        action: 'dikkati dağıldı',
+        subject: 'Uuyarı Gönderildi',
+        time: '5 DAKİKA ÖNCE',
+        type: 'warning',
+        icon: <AlertTriangle size={14} />
+    },
+    {
+        id: 3,
+        studentName: 'Deniz Yılmaz',
+        action: 'parmak kaldırdı',
+        subject: 'Soru Sormak İstiyor',
+        time: '12 DAKİKA ÖNCE',
+        type: 'info',
+        icon: <MessageSquare size={14} />
+    },
+    {
+        id: 4,
+        studentName: 'Bulut Kaya',
+        action: 'odaklanma seviyesi arttı',
+        subject: 'Motivasyon',
+        time: '15 DAKİKA ÖNCE',
+        type: 'success',
+        icon: <Zap size={14} />
+    },
+];
+
 export const TeacherPanel: React.FC = () => {
     const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
     const [isActionLoading, setIsActionLoading] = useState(false);
@@ -138,15 +177,23 @@ export const TeacherPanel: React.FC = () => {
                             </button>
                         </div>
                         <div className="space-y-4">
-                            {[1, 2, 3].map((i) => (
-                                <div key={i} className="flex items-start gap-4 p-3 rounded-xl hover:bg-slate-800/30 transition-colors group">
-                                    <div className="mt-1 w-2 h-2 rounded-full bg-indigo-500" />
+                            {MOCK_ACTIVITIES.map((activity) => (
+                                <div key={activity.id} className="flex items-start gap-4 p-3 rounded-xl hover:bg-slate-800/30 transition-colors group">
+                                    <div className={`mt-1.5 w-6 h-6 rounded-lg flex items-center justify-center ${activity.type === 'success' ? 'bg-emerald-500/10 text-emerald-400' :
+                                            activity.type === 'warning' ? 'bg-red-500/10 text-red-400' :
+                                                'bg-blue-500/10 text-blue-400'
+                                        }`}>
+                                        {activity.icon}
+                                    </div>
                                     <div className="flex-1">
                                         <p className="text-sm text-slate-300">
-                                            <span className="font-bold text-white">Güneş Aksoy</span> answered a question correctly about
-                                            <span className="text-indigo-400 font-medium ml-1">Quantum Physics</span>.
+                                            <span className="font-bold text-white">{activity.studentName}</span> {activity.action}
+                                            <span className={`font-medium ml-1 ${activity.type === 'success' ? 'text-emerald-400' :
+                                                    activity.type === 'warning' ? 'text-red-400' :
+                                                        'text-indigo-400'
+                                                }`}>{activity.subject}</span>.
                                         </p>
-                                        <span className="text-[10px] text-slate-600 uppercase font-black tracking-widest mt-1 block">2 MINS AGO</span>
+                                        <span className="text-[10px] text-slate-600 uppercase font-black tracking-widest mt-1 block">{activity.time}</span>
                                     </div>
                                 </div>
                             ))}
