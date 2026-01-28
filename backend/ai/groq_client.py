@@ -37,7 +37,26 @@ Kısa ve doğal bir öğrenci yanıtı ver. Maksimum 20 kelime kullan. Türkçe 
             )
             return response.choices[0].message.content.strip()
         except Exception as e:
-            print(f"Groq API Error: {e}")
+            print(f"Groq API Error (Chat): {e}")
+            return None
+
+    def transcribe_audio(self, audio_file_path: str) -> Optional[str]:
+        """Transcribe audio using Whisper-large-v3 model."""
+        if not self.client:
+            return None
+        
+        try:
+            with open(audio_file_path, "rb") as file:
+                transcription = self.client.audio.transcriptions.create(
+                    file=(audio_file_path, file.read()),
+                    model="whisper-large-v3",
+                    prompt="Sanal sınıf ortamında Türkçe konuşma.", # Prompt for better Turkish context
+                    response_format="text",
+                    language="tr"
+                )
+            return str(transcription).strip()
+        except Exception as e:
+            print(f"Groq API Error (STT): {e}")
             return None
 
 groq_client = GroqClient()

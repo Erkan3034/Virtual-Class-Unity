@@ -129,7 +129,8 @@ class DecisionPipeline:
             "animation": behavior.get("animation", "confused"),
             "emotion": behavior.get("emotion", "confused"),
             "confidence": nlp.get("confidence", 0.5),
-            "updates": rules
+            "updates": rules,
+            "raw_input": nlp.get("raw_text")
         }
 
 
@@ -182,7 +183,8 @@ class DecisionPipeline:
                 timestamp=datetime.now().isoformat(),
                 source=source,
                 latency_ms=latency,
-                decision_id=d_id
+                decision_id=d_id,
+                transcribed_text=decision.get("raw_input") or decision.get("reply_text") # Full context or fallback
             )
         )
 

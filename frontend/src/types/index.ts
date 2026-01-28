@@ -41,6 +41,7 @@ export interface AIResponseMeta {
   source: InputSourceType;
   latency_ms: number;
   decision_id: string;
+  transcribed_text?: string;
 }
 
 // --- Response ---

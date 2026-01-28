@@ -43,6 +43,7 @@ class AIResponseMeta(BaseModel):
     source: InputSourceType
     latency_ms: int = 0
     decision_id: str = ""
+    transcribed_text: Optional[str] = None
 
 class AIResponse(BaseModel):
     """Internal full response model with trace for Debug Dashboard."""

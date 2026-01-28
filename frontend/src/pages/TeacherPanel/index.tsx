@@ -11,7 +11,10 @@ import {
     Mic,
     MoreVertical,
     ChevronRight,
+    Square,
+    Loader2
 } from 'lucide-react';
+import { useRef } from 'react';
 import type { Student, TeacherActionType, TeacherInputRequest, AIResponse } from '../../types';
 import { apiClient } from '../../api/client';
 
@@ -71,6 +74,14 @@ export const TeacherPanel: React.FC = () => {
     const [showMessageModal, setShowMessageModal] = useState(false);
     const [individualMessage, setIndividualMessage] = useState('');
 
+    // Voice Recording State
+    const [isRecording, setIsRecording] = useState(false);
+    const [recordingTime, setRecordingTime] = useState(0);
+    const [voiceStatus, setVoiceStatus] = useState<'idle' | 'recording' | 'processing' | 'success' | 'error'>('idle');
+    const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+    const recordingIntervalRef = useRef<number | null>(null);
+    const audioChunksRef = useRef<Blob[]>([]);
+
 
     const handleTeacherAction = async (action: TeacherActionType) => {
         if (!selectedStudentId) return;
@@ -101,6 +112,83 @@ export const TeacherPanel: React.FC = () => {
         } finally {
             setIsActionLoading(false);
         }
+    };
+
+    const startRecording = async () => {
+        try {
+            setVoiceStatus('recording');
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            const mediaRecorder = new MediaRecorder(stream);
+            mediaRecorderRef.current = mediaRecorder;
+            audioChunksRef.current = [];
+
+            mediaRecorder.ondataavailable = (event) => {
+                if (event.data.size > 0) {
+                    audioChunksRef.current.push(event.data);
+                }
+            };
+
+            mediaRecorder.onstop = async () => {
+                const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
+                await processAudioAndSend(audioBlob);
+                stream.getTracks().forEach(track => track.stop());
+            };
+
+            mediaRecorder.start();
+            setIsRecording(true);
+            setRecordingTime(0);
+            recordingIntervalRef.current = window.setInterval(() => {
+                setRecordingTime(prev => prev + 1);
+            }, 1000);
+
+        } catch (err) {
+            console.error("Microphone access denied:", err);
+            setVoiceStatus('error');
+            setActionStatus("Hata: Mikrofon erişimi reddedildi.");
+        }
+    };
+
+    const stopRecording = () => {
+        if (mediaRecorderRef.current && isRecording) {
+            mediaRecorderRef.current.stop();
+            setIsRecording(false);
+            setVoiceStatus('processing');
+            if (recordingIntervalRef.current) {
+                clearInterval(recordingIntervalRef.current);
+            }
+        }
+    };
+
+    const processAudioAndSend = async (blob: Blob) => {
+        setIsActionLoading(true);
+        setVoiceStatus('processing');
+        setActionStatus("Ses işleniyor...");
+
+        const reader = new FileReader();
+        reader.readAsDataURL(blob);
+        reader.onloadend = async () => {
+            const base64Audio = reader.result as string;
+
+            try {
+                const response = await apiClient.sendTeacherAction({
+                    source: "web",
+                    teacher_id: "teacher_001",
+                    student_id: selectedStudentId || "student_001",
+                    input_type: "voice",
+                    content: base64Audio
+                });
+
+                setLastResponse(response);
+                setVoiceStatus('success');
+                setActionStatus(null);
+                // Modal stays open to show results
+            } catch (err: any) {
+                setVoiceStatus('error');
+                setActionStatus(`Hata: ${err.message}`);
+            } finally {
+                setIsActionLoading(false);
+            }
+        };
     };
 
 
@@ -180,8 +268,8 @@ export const TeacherPanel: React.FC = () => {
                             {MOCK_ACTIVITIES.map((activity) => (
                                 <div key={activity.id} className="flex items-start gap-4 p-3 rounded-xl hover:bg-slate-800/30 transition-colors group">
                                     <div className={`mt-1.5 w-6 h-6 rounded-lg flex items-center justify-center ${activity.type === 'success' ? 'bg-emerald-500/10 text-emerald-400' :
-                                            activity.type === 'warning' ? 'bg-red-500/10 text-red-400' :
-                                                'bg-blue-500/10 text-blue-400'
+                                        activity.type === 'warning' ? 'bg-red-500/10 text-red-400' :
+                                            'bg-blue-500/10 text-blue-400'
                                         }`}>
                                         {activity.icon}
                                     </div>
@@ -189,8 +277,8 @@ export const TeacherPanel: React.FC = () => {
                                         <p className="text-sm text-slate-300">
                                             <span className="font-bold text-white">{activity.studentName}</span> {activity.action}
                                             <span className={`font-medium ml-1 ${activity.type === 'success' ? 'text-emerald-400' :
-                                                    activity.type === 'warning' ? 'text-red-400' :
-                                                        'text-indigo-400'
+                                                activity.type === 'warning' ? 'text-red-400' :
+                                                    'text-indigo-400'
                                                 }`}>{activity.subject}</span>.
                                         </p>
                                         <span className="text-[10px] text-slate-600 uppercase font-black tracking-widest mt-1 block">{activity.time}</span>
@@ -327,7 +415,16 @@ export const TeacherPanel: React.FC = () => {
                                                     {lastResponse.emotion}
                                                 </span>
                                             </div>
-                                            <p className="text-white text-sm font-medium">{lastResponse.reply_text}</p>
+                                            {lastResponse.meta.transcribed_text && (
+                                                <div className="p-2 bg-slate-900 rounded-lg border border-slate-700/50 mb-2">
+                                                    <span className="text-[10px] font-bold text-indigo-400 uppercase block mb-1">Sizin Söylediğiniz</span>
+                                                    <p className="text-slate-300 text-xs italic">"{lastResponse.meta.transcribed_text}"</p>
+                                                </div>
+                                            )}
+                                            <div className="p-2 bg-indigo-500/5 rounded-lg border border-indigo-500/10">
+                                                <span className="text-[10px] font-bold text-white uppercase block mb-1">Öğrencinin Yanıtı</span>
+                                                <p className="text-white text-sm font-medium">{lastResponse.reply_text}</p>
+                                            </div>
                                             <div className="flex gap-2 text-[10px] text-slate-500">
                                                 <span>Animation: {lastResponse.animation}</span>
                                                 <span>•</span>
@@ -446,19 +543,123 @@ export const TeacherPanel: React.FC = () => {
                             onClick={(e) => e.stopPropagation()}
                             className="bg-slate-900 border border-slate-800 rounded-3xl p-8 w-[400px] max-w-[90vw] text-center"
                         >
-                            <div className="w-20 h-20 mx-auto mb-4 bg-indigo-600/20 rounded-full flex items-center justify-center">
-                                <Mic size={40} className="text-indigo-400" />
+                            <div className="w-24 h-24 mx-auto mb-6 relative">
+                                <AnimatePresence>
+                                    {isRecording && (
+                                        <motion.div
+                                            initial={{ scale: 0.8, opacity: 0 }}
+                                            animate={{ scale: 1.5, opacity: 0.3 }}
+                                            exit={{ scale: 0.8, opacity: 0 }}
+                                            transition={{ repeat: Infinity, duration: 1.5 }}
+                                            className="absolute inset-0 bg-red-500 rounded-full"
+                                        />
+                                    )}
+                                </AnimatePresence>
+                                <div className={`relative w-full h-full rounded-full flex items-center justify-center transition-colors ${isRecording ? 'bg-red-500 text-white' : 'bg-indigo-600/20 text-indigo-400'
+                                    }`}>
+                                    {isRecording ? <Square size={40} /> : <Mic size={40} />}
+                                </div>
                             </div>
-                            <h2 className="text-xl font-bold text-white mb-2">Sesli Etkileşim</h2>
-                            <p className="text-slate-400 text-sm mb-6">
-                                Sesli etkileşim özelliği yakında aktif olacak. Şimdilik metin girişini kullanabilirsiniz.
-                            </p>
-                            <button
-                                onClick={() => setShowVoiceModal(false)}
-                                className="px-6 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold transition-all"
-                            >
-                                Tamam
-                            </button>
+
+                            <h2 className="text-2xl font-bold text-white mb-2">
+                                {isRecording ? 'Dinliyorum...' : 'Sesli Etkileşim'}
+                            </h2>
+
+                            {isRecording ? (
+                                <div className="mb-8">
+                                    <div className="text-3xl font-mono text-red-500 font-bold mb-2">
+                                        00:{recordingTime.toString().padStart(2, '0')}
+                                    </div>
+                                    <p className="text-slate-400 text-sm">
+                                        Şimdi konuşun, işim bittiğinde durdurun.
+                                    </p>
+                                </div>
+                            ) : (
+                                <p className="text-slate-400 text-sm mb-8">
+                                    {isActionLoading ? 'Sesiniz işleniyor, lütfen bekleyin...' : 'Mikrofonu kullanarak öğrenciye komut verin.'}
+                                </p>
+                            )}
+
+                            <div className="flex flex-col gap-3">
+                                {voiceStatus === 'success' && lastResponse ? (
+                                    <div className="space-y-6 text-left">
+                                        <div className="p-4 bg-indigo-500/10 border border-indigo-500/20 rounded-2xl">
+                                            <span className="text-[10px] font-bold text-indigo-400 uppercase block mb-1">Duyulan Komut</span>
+                                            <p className="text-white text-lg font-medium italic">"{lastResponse.meta.transcribed_text || '...'}"</p>
+                                        </div>
+
+                                        <div className="p-4 bg-slate-800 border border-slate-700 rounded-2xl">
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <span className="text-[10px] font-bold text-slate-500 uppercase">Öğrenci Yanıtı</span>
+                                                <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] font-bold rounded capitalize">
+                                                    {lastResponse.emotion}
+                                                </span>
+                                            </div>
+                                            <p className="text-white text-base leading-relaxed">{lastResponse.reply_text}</p>
+                                        </div>
+
+                                        <div className="grid grid-cols-2 gap-3 pt-2">
+                                            <button
+                                                onClick={() => {
+                                                    setVoiceStatus('idle');
+                                                    setLastResponse(null);
+                                                }}
+                                                className="py-3 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-bold transition-all text-sm"
+                                            >
+                                                Tekrar Dene
+                                            </button>
+                                            <button
+                                                onClick={() => {
+                                                    setShowVoiceModal(false);
+                                                    setVoiceStatus('idle');
+                                                }}
+                                                className="py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold transition-all text-sm"
+                                            >
+                                                Kapat
+                                            </button>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <>
+                                        {!isRecording ? (
+                                            <button
+                                                onClick={startRecording}
+                                                disabled={isActionLoading}
+                                                className="w-full py-4 bg-indigo-600 hover:bg-indigo-500 text-white rounded-2xl font-bold transition-all flex items-center justify-center gap-3 disabled:opacity-50"
+                                            >
+                                                {isActionLoading ? (
+                                                    <>
+                                                        <Loader2 size={20} className="animate-spin" />
+                                                        İşleniyor...
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <Mic size={20} /> Kayda Başla
+                                                    </>
+                                                )}
+                                            </button>
+                                        ) : (
+                                            <button
+                                                onClick={stopRecording}
+                                                className="w-full py-4 bg-red-600 hover:bg-red-500 text-white rounded-2xl font-bold transition-all flex items-center justify-center gap-3"
+                                            >
+                                                <Square size={20} /> Kaydı Durdur
+                                            </button>
+                                        )}
+
+                                        <button
+                                            onClick={() => {
+                                                if (isRecording) stopRecording();
+                                                setShowVoiceModal(false);
+                                                setVoiceStatus('idle');
+                                            }}
+                                            className="w-full py-2 text-slate-500 hover:text-slate-300 transition-all text-sm font-medium"
+                                        >
+                                            İptal
+                                        </button>
+                                    </>
+                                )}
+                            </div>
                         </motion.div>
                     </motion.div>
                 )}

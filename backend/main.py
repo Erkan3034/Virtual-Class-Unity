@@ -5,6 +5,7 @@ from models.definitions import TeacherInputRequest, AIResponse, UnityResponse
 from ai.pipeline import pipeline
 from ws.manager import manager
 from security.auth import get_current_user, check_role
+from services.voice_processor import voice_processor
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -32,6 +33,18 @@ async def process_teacher_input(
     """REST endpoint for manual teacher overrides. Auth disabled in DEBUG mode."""
 
     try:
+        # Handle Voice Input if necessary
+        if request.input_type == "voice":
+            print(f"DEBUG: Processing voice input from {request.source}")
+            transcribed_text = voice_processor.process_base64_audio(request.content)
+            if transcribed_text:
+                print(f"DEBUG: Transcribed text: {transcribed_text}")
+                request.content = transcribed_text
+            else:
+                # Fallback or error if transcription fails
+                print("WARNING: Voice transcription failed, using empty content.")
+                request.content = ""
+
         response = pipeline.process(request)
         
         # BROADCAST: Send the response to Unity and Debug Dashboard
@@ -83,13 +96,23 @@ async def classroom_socket(
             data = await websocket.receive_json()
             
             # 1. Handle incoming Unity/Teacher messages
-            if data.get("type") == "STUDENT_INPUT":
+            if data.get("type") == "STUDENT_INPUT" or data.get("type") == "VOICE_INPUT":
+                content = data.get("text") or data.get("audio_base64")
+                input_type = "voice" if data.get("type") == "VOICE_INPUT" else "text"
+                
+                # Process voice if needed
+                if input_type == "voice" and content:
+                    transcribed_text = voice_processor.process_base64_audio(content)
+                    content = transcribed_text or ""
+                    print(f"DEBUG WS: Transcribed voice to: {content}")
+
                 # Process through AI Pipeline
                 req = TeacherInputRequest(
                     source="unity",
                     teacher_id="system",
                     student_id=data["student_id"],
-                    content=data["text"]
+                    content=content,
+                    input_type=input_type
                 )
                 response = pipeline.process(req)
                 
