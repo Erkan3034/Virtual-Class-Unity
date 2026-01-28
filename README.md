@@ -1,45 +1,45 @@
-# Virtual Classroom AI System (MVP)
+# Sanal Sınıf Yapay Zeka Sistemi (MVP)
 
-An MVP backend/frontend system for a Unity-based virtual classroom, featuring AI-driven student-teacher interaction. This system uses a modular Python backend (FastAPI) and a React-based teacher dashboard to simulate and control virtual student agents.
+Unity tabanlı sanal sınıf için, yapay zeka destekli öğrenci-öğretmen etkileşimi sunan bir MVP arka uç/ön yüz sistemi. Bu sistem, sanal öğrenci ajanlarını simüle etmek ve kontrol etmek için modüler bir Python arka ucu (FastAPI) ve React tabanlı bir öğretmen paneli kullanır.
 
-## 🏗 System Architecture
+## Sistem Mimarisi
 
-For a detailed view of the system flow, data flow, and components, please refer to the [System Architecture Diagram](docs/FLOW_DIAGRAM.md).
+Sistem akışı, veri akışı ve bileşenlerin detaylı görünümü için lütfen [Sistem Mimarisi Şeması](docs/FLOW_DIAGRAM.md)'na bakın.
 
-- **Backend:** Python FastAPI (Modular, Extensible, Sync/Async Support)
+- **Backend:** Python FastAPI (Modüler, Genişletilebilir, Senkron/Asenkron Desteği)
 - **Frontend:** React + Vite + TypeScript + Tailwind CSS
-- **AI Engine:** Google Gemini & Groq (Llama 3) for Decision Making
-- **Unity:** C# Client (WebSocket & REST Integration)
+- **Yapay Zeka Motoru:** Karar Verme için Google Gemini & Groq (Llama 3)
+- **Unity:** C# İstemci (WebSocket & REST Entegrasyonu)
 
-## 🚀 Active Features
+##  Aktif Özellikler
 
-### 1. AI-Driven Decision Pipeline
-The core of the system is the `ai/pipeline.py` which processes inputs through stages:
-- **NLP Analyzer:** Rule-based detection for common intents (Greeting, Praise, Discipline).
-- **Knowledge Base:** Pre-defined responses for instant feedback.
-- **LLM Integration:** Handling complex or unknown queries using Groq/Gemini.
+### 1. Yapay Zeka Destekli Karar Hattı (Pipeline)
+Sistemin çekirdeği, girdileri aşamalı olarak işleyen `ai/pipeline.py` dosyasıdır:
+- **NLP Analizörü:** Yaygın niyetler (Selamlaşma, Övgü, Disiplin) için kural tabanlı tespit.
+- **Bilgi Tabanı (Knowledge Base):** Anlık geri bildirimler için önceden tanımlanmış yanıtlar.
+- **LLM Entegrasyonu:** Karmaşık veya bilinmeyen sorguları işlemek için Groq/Gemini kullanımı.
 
-### 2. Multi-Client Synchronization
-- **WebSocket Manager:** Broadcasts state changes to all connected clients (Unity & Web).
-- **Role-Based Messaging:** Directed messages to specific roles (`unity`, `debug`, `teacher`).
+### 2. Çoklu İstemci Senkronizasyonu
+- **WebSocket Yöneticisi:** Durum değişikliklerini bağlı tüm istemcilere (Unity & Web) yayınlar.
+- **Role Dayalı Mesajlaşma:** Belirli rollere (`unity`, `debug`, `teacher`) yönlendirilmiş mesajlar.
 
-### 3. Teacher Dashboard & Debug Tools
-- **Teacher Panel:** Interface for sending manual commands and overriding AI behavior.
-- **Debug Dashboard:** Real-time visibility into the "thought process" of the AI (latency, confidence, decided emotion).
+### 3. Öğretmen Paneli & Hata Ayıklama Araçları
+- **Öğretmen Paneli:** Manuel komutlar göndermek ve YZ davranışını geçersiz kılmak için arayüz.
+- **Debug Dashboard:** Yapay zekanın "düşünce sürecini" (gecikme, güven, seçilen duygu) gerçek zamanlı izleme.
 
-## 🛠 Setup & Installation
+##  Kurulum ve Hazırlık
 
-### Prerequisites
+### Ön Gereksinimler
 - Python 3.9+
 - Node.js 18+
 - npm
 
-### 1. Backend Setup
-1. Navigate to the backend directory:
+### 1. Backend Kurulumu
+1. Backend klasörüne gidin:
    ```bash
    cd backend
    ```
-2. Create a virtual environment and activate it:
+2. Sanal ortam oluşturun ve aktif edin:
    ```bash
    python -m venv venv
    # Windows
@@ -47,55 +47,55 @@ The core of the system is the `ai/pipeline.py` which processes inputs through st
    # Mac/Linux
    source venv/bin/activate
    ```
-3. Install dependencies:
+3. Bağımlılıkları yükleyin:
    ```bash
    pip install -r requirements.txt
    ```
-4. **Configuration:** Create a `.env` file in the `backend` folder with your API keys:
+4. **Konfigürasyon:** `backend` klasöründe API anahtarlarınızla bir `.env` dosyası oluşturun:
    ```env
    GEMINI_API_KEY=your_gemini_key
    GROQ_API_KEY=your_groq_key
    DEBUG=True
    SECRET_KEY=your_secret_key
    ```
-   *(Note: See `.env.example` if available or ask for keys if working in a team)*
+   *(Not: Ekip çalışması yapıyorsanız anahtarlar için `.env.example` dosyasına bakın veya isteyin)*
 
-5. Run the server:
+5. Sunucuyu çalıştırın:
    ```bash
    uvicorn main:app --reload
    ```
-   - API Docs: `http://localhost:8000/docs`
+   - API Dokümantasyonu: `http://localhost:8000/docs`
    - WebSocket: `ws://localhost:8000/ws/v1/classroom/{room_id}`
 
-### 2. Frontend Setup
-1. Navigate to the frontend directory:
+### 2. Frontend Kurulumu
+1. Frontend klasörüne gidin:
    ```bash
    cd frontend
    ```
-2. Install dependencies:
+2. Bağımlılıkları yükleyin:
    ```bash
    npm install
    ```
-3. Run the development server:
+3. Geliştirme sunucusunu çalıştırın:
    ```bash
    npm run dev
    ```
-   - Application: `http://localhost:5173`
+   - Uygulama: `http://localhost:5173`
 
-## 📖 How to Use
+#  Nasıl Kullanılır
 
-1. **Start Services:** Ensure both Backend (Port 8000) and Frontend (Port 5173) are running.
-2. **Open Teacher Panel:** Go to `http://localhost:5173` in your browser.
-3. **Connect Unity (Optional):** If developing with Unity, run the client to automatically connect to `ws://localhost:8000`.
-4. **Send Commands:**
-   - Use the Dashboard to send commands like "Sit Down", "Answer Question".
-   - The AI will process the intent, select an animation/emotion, and broadcast it.
-   - You will see the response in the Debug section of the dashboard.
+1. **Servisleri Başlatın:** Hem Backend (Port 8000) hem de Frontend (Port 5173) çalıştığından emin olun.
+2. **Öğretmen Panelini Açın:** Tarayıcınızda `http://localhost:5173` adresine gidin.
+3. **Unity Bağlantısı (Opsiyonel):** Unity ile geliştirme yapıyorsanız, istemciyi çalıştırarak otomatik olarak `ws://localhost:8000` adresine bağlanmasını sağlayın.
+4. **Komut Gönderin:**
+   - Panel üzerinden "Otur", "Soruyu Cevapla" gibi komutlar gönderin.
+   - Yapay zeka niyeti işleyecek, bir animasyon/duygu seçecek ve bunu yayınlayacaktır.
+   - Yanıtı paneldeki Debug bölümünde görebilirsiniz.
 
-## 📂 Project Structure
+## Proje Yapısı
 
-- `backend/app`: Core application logic (Pipeline, Models).
-- `backend/ai`: Decision engines and integrations (Groq, Gemini).
-- `backend/nlp`: Natural Language Processing and Knowledge Base.
-- `backend/ws`: WebSocket connection manager.
-- `docs/`: Detailed design documents and API specs.
+- `backend/app`: Temel uygulama mantığı (Pipeline, Modeller).
+- `backend/ai`: Karar motorları ve entegrasyonlar (Groq, Gemini).
+- `backend/nlp`: Doğal Dil İşleme ve Bilgi Tabanı.
+- `backend/ws`: WebSocket bağlantı yöneticisi.
+- `docs/`: Detaylı tasarım belgeleri ve API özellikleri.
