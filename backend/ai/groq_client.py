@@ -14,26 +14,36 @@ class GroqClient:
         else:
             print("WARNING: GROQ_API_KEY not found. AI fallback disabled.")
 
-    def generate_response(self, prompt: str, context: str = "") -> Optional[str]:
+    def generate_response(self, prompt: str, context: str = "", structured: bool = False) -> Optional[str]:
         if not self.client:
             return None
         
-        full_prompt = f"""Sen sanal bir sınıfta öğrenci karakterisin.
-Bağlam: {context}
+        if structured:
+            system_prompt = """Sen sanal bir sınıfta meraklı ve dikkatli bir öğrencisin. 
+Yanıtını MUTLAKA aşağıdaki JSON formatında ver:
+{
+  "reply_text": "yanıt metni",
+  "animation": "animasyon_adı",
+  "emotion": "duygu_adı"
+}
+Kullanabileceğin Animasyonlar: sit, stand, wave, thinking_pose, happy_nod, confused_look, listening_pose.
+Kullanabileceğin Duygular: neutral, happy, sad, confused, sleepy, alert, motivated, regretful.
+Yanıtın kısa, doğal ve Türkçe olsun."""
+        else:
+            system_prompt = "Sen sanal bir sınıfta meraklı ve dikkatli bir öğrencisin. Kısa ve doğal yanıtlar ver. Türkçe yanıt ver."
 
-Öğretmen/Kullanıcı Mesajı: {prompt}
-
-Kısa ve doğal bir öğrenci yanıtı ver. Maksimum 20 kelime kullan. Türkçe yanıt ver."""
+        full_prompt = f"Bağlam: {context}\n\nÖğretmen/Kullanıcı Mesajı: {prompt}"
         
         try:
             response = self.client.chat.completions.create(
-                model="llama-3.1-8b-instant",  # Fast and free
+                model="llama-3.1-8b-instant",
                 messages=[
-                    {"role": "system", "content": "Sen sanal bir sınıfta meraklı ve dikkatli bir öğrencisin. Kısa ve doğal yanıtlar ver."},
+                    {"role": "system", "content": system_prompt},
                     {"role": "user", "content": full_prompt}
                 ],
-                max_tokens=100,
-                temperature=0.7
+                max_tokens=200,
+                temperature=0.7,
+                response_format={"type": "json_object"} if structured else None
             )
             return response.choices[0].message.content.strip()
         except Exception as e:

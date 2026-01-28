@@ -16,22 +16,35 @@ class GeminiClient:
             print("WARNING: GEMINI_API_KEY not found. AI fallback disabled.")
 
 
-    def generate_response(self, prompt: str, context: str = "") -> Optional[str]:
+    def generate_response(self, prompt: str, context: str = "", structured: bool = False) -> Optional[str]:
         if not self.model:
             return None
         
-        full_prompt = f"""
-        You are an AI assistant in a virtual classroom. 
-        Context from Knowledge Base: {context}
-        
-        Student/Teacher Input: {prompt}
-        
-        Provide a concise, helpful response as a student character.
-        Keep it under 20 words.
-        """
+        if structured:
+            system_instruction = """Sen sanal bir sınıfta meraklı ve dikkatli bir öğrencisin. 
+Yanıtını MUTLAKA aşağıdaki JSON formatında ver:
+{
+  "reply_text": "yanıt metni",
+  "animation": "animasyon_adı",
+  "emotion": "duygu_adı"
+}
+Kullanabileceğin Animasyonlar: sit, stand, wave, thinking_pose, happy_nod, confused_look, listening_pose.
+Kullanabileceğin Duygular: neutral, happy, sad, confused, sleepy, alert, motivated, regretful.
+Yanıtın kısa, doğal ve Türkçe olsun."""
+        else:
+            system_instruction = "Sen sanal bir sınıfta meraklı ve dikkatli bir öğrencisin. Kısa ve doğal yanıtlar ver. Türkçe yanıt ver."
+
+        full_prompt = f"Bağlam: {context}\n\nÖğretmen/Kullanıcı Mesajı: {prompt}"
         
         try:
-            response = self.model.generate_content(full_prompt)
+            generation_config = {
+                "response_mime_type": "application/json"
+            } if structured else {}
+            
+            response = self.model.generate_content(
+                f"{system_instruction}\n\n{full_prompt}",
+                generation_config=generation_config
+            )
             return response.text
         except Exception as e:
             print(f"Gemini API Error: {e}")

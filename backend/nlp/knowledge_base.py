@@ -22,6 +22,12 @@ class KnowledgeBase:
             "sessiz": "discipline",
             "dinle": "attention_command",
             "soru": "question_expectation",
+            "otur": "command_sit",
+            "kalk": "command_stand",
+            "ayağa": "command_stand",
+            "yerine": "command_sit",
+            "sessiz": "discipline",
+            "sus": "discipline",
         }
         
         # Intent to Response Templates
@@ -45,6 +51,12 @@ class KnowledgeBase:
             "discipline": [
                 {"reply_text": "Özür dilerim, hemen toparlanıyorum.", "animation": "neutral_stand", "emotion": "regretful"},
                 {"reply_text": "Tamam, dinliyorum.", "animation": "listening_pose", "emotion": "neutral"},
+            ],
+            "command_sit": [
+                {"reply_text": "Oturuyorum öğretmenim.", "animation": "sit", "emotion": "neutral"},
+            ],
+            "command_stand": [
+                {"reply_text": "Kalkıyorum öğretmenim.", "animation": "stand", "emotion": "neutral"},
             ],
              "unknown": [
                 {"reply_text": "Hımmm... Tam emin olamadım.", "animation": "thinking_pose", "emotion": "neutral"},

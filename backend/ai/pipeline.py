@@ -86,51 +86,71 @@ class DecisionPipeline:
         return updates
 
     def _ai_reasoning(self, nlp: Dict[str, Any], state: StudentStateModel, rules: Dict[str, Any]) -> Dict[str, Any]:
-        """Placeholder for LLM. Combines NLP intent + State + Rules into a student behavior."""
-        # Simple simulation based on intent
-        responses = {
-            "praise": {"reply_text": "Teşekkürler öğretmenim!", "animation": "happy", "emotion": "happy"},
-            "warn": {"reply_text": "Özür dilerim, dikkat ediyorum.", "animation": "alert", "emotion": "neutral"},
-            "greeting": {"reply_text": "Merhaba!", "animation": "wave", "emotion": "happy"},
-            "encourage": {"reply_text": "Daha çok çalışacağım!", "animation": "motivated", "emotion": "motivated"},
-            "question": {"reply_text": "Hmm, düşüneyim...", "animation": "thinking", "emotion": "neutral"},
-            "command_sit": {"reply_text": "Oturuyorum öğretmenim.", "animation": "sit", "emotion": "neutral"},
-            "command_stand": {"reply_text": "Kalkıyorum öğretmenim.", "animation": "stand", "emotion": "neutral"},
-            "ignore": {"reply_text": "...", "animation": "idle", "emotion": "neutral"},
-            "unknown": {"reply_text": "...", "animation": "confused", "emotion": "confused"}
-        }
-
-        
+        """Enhanced reasoning with structured output support."""
+        import json
         intent = nlp["intent"]
-        # Use a copy to avoid modifying the original response templates
-        behavior = responses.get(intent, responses["unknown"]).copy()
+        raw_text = nlp["raw_text"]
+        
+        # High-priority physical commands should skip LLM if recognized by rules early
+        # but for natural variations, structured AI is better.
+        
+        # Available Animations for the AI to choose from
+        available_animations = ["sit", "stand", "wave", "thinking_pose", "happy_nod", "confused_look", "listening_pose", "idle"]
         
         # 1. AI Fallback for Unknown or Complex Queries (Groq > Gemini)
-        if intent == "unknown" or intent == "question":
-            from nlp.knowledge_base import knowledge_base
-            from ai.groq_client import groq_client
-            kb_context = knowledge_base.get_all_topics() # RAG: Get context from KB
-            
-            # Try Groq first (faster and more reliable), fallback to Gemini
-            ai_reply = groq_client.generate_response(nlp["raw_text"], context=str(kb_context))
-            if not ai_reply:
-                ai_reply = gemini_client.generate_response(nlp["raw_text"], context=str(kb_context))
-            
-            if ai_reply:
-                behavior["reply_text"] = ai_reply
-                behavior["animation"] = "thinking_pose"
-                behavior["emotion"] = "motivated"
+        from nlp.knowledge_base import knowledge_base
+        from ai.groq_client import groq_client
+        from ai.gemini_client import gemini_client
+        kb_context = knowledge_base.get_all_topics()
+        
+        # We want structured output
+        ai_raw_response = groq_client.generate_response(raw_text, context=str(kb_context), structured=True)
+        if not ai_raw_response:
+            ai_raw_response = gemini_client.generate_response(raw_text, context=str(kb_context), structured=True)
+        
+        behavior = {
+            "reply_text": "...",
+            "animation": "thinking_pose",
+            "emotion": "neutral"
+        }
 
+        if ai_raw_response:
+            try:
+                # Sanitize response (sometimes LLMs wrap in code blocks)
+                cleaned = ai_raw_response.strip()
+                if cleaned.startswith("```json"):
+                    cleaned = cleaned.replace("```json", "").replace("```", "").strip()
+                
+                ai_json = json.loads(cleaned)
+                behavior["reply_text"] = ai_json.get("reply_text", "...")
+                behavior["animation"] = ai_json.get("animation", "thinking_pose")
+                behavior["emotion"] = ai_json.get("emotion", "neutral")
+                
+                # Validation: Ensure animation is in our supported list
+                if behavior["animation"] not in available_animations:
+                    # Heuristic mapping if LLM hallucinated an animation
+                    if "otur" in behavior["reply_text"].lower(): behavior["animation"] = "sit"
+                    elif "kalk" in behavior["reply_text"].lower(): behavior["animation"] = "stand"
+                    else: behavior["animation"] = "thinking_pose"
 
-        # Safe access to ensure we don't get KeyError
+            except Exception as e:
+                print(f"ERROR: AI JSON Parsing failed: {e}. Output was: {ai_raw_response}")
+                behavior["reply_text"] = ai_raw_response[:100] # Fallback to raw text if parsing fails
+        
+        # 2. Rule-based override if intent is a strict command and LLM didn't catch it
+        if intent == "command_sit":
+            behavior["animation"] = "sit"
+        elif intent == "command_stand":
+            behavior["animation"] = "stand"
+
         return {
-            "intent": intent, # Ensure intent is passed through
+            "intent": intent,
             "reply_text": behavior.get("reply_text", "..."),
-            "animation": behavior.get("animation", "confused"),
-            "emotion": behavior.get("emotion", "confused"),
+            "animation": behavior.get("animation", "thinking_pose"),
+            "emotion": behavior.get("emotion", "neutral"),
             "confidence": nlp.get("confidence", 0.5),
             "updates": rules,
-            "raw_input": nlp.get("raw_text")
+            "raw_input": raw_text
         }
 
 
